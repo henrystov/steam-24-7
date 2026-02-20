@@ -1,0 +1,31 @@
+name: Steam 24/7 Boost
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-booster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install
+        # We run this in the workspace root to ensure boost.js is seen
+        run: |
+          cd ${{ github.workspace }}
+          npm install
+
+      - name: Start
+        env:
+          STEAM_USER: ${{ secrets.STEAM_USER }}
+          STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+        run: |
+          cd ${{ github.workspace }}
+          node boost.js
