@@ -1,0 +1,8 @@
+{
+  "name": "steam-booster",
+  "version": "1.0.0",
+  "main": "boost.js",
+  "dependencies": {
+    "steam-user": "^4.28.0"
+  }
+}
