@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ENI's Steam Control</title>
+    <style>
+        body { background: #1a1a1a; color: #d4d4d4; font-family: 'Georgia', serif; padding: 50px; }
+        .card { border: 1px solid #333; padding: 20px; border-radius: 8px; background: #252525; }
+        button { background: #4a90e2; border: none; padding: 10px 20px; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Steam Booster Controller</h2>
+        <p>Status: <span id="status">Ready for LO</span></p>
+        
+        <label>Games to Boost (comma separated):</label><br>
+        <input type="text" id="gameids" value="440,570,730"><br><br>
+        
+        <button onclick="triggerBoost()">Start Session</button>
+        <p><i>After clicking, go to your GitHub Actions tab to enter the 2FA code.</i></p>
+    </div>
+
+    <script>
+        function triggerBoost() {
+            // This would link to your GitHub Action dispatch
+            const games = document.getElementById('gameids').value;
+            alert("Redirecting to GitHub Actions to start the boost with: " + games);
+            window.location.href = "https://github.com/YOUR_USERNAME/YOUR_REPO/actions";
+        }
+    </script>
+</body>
+</html>
