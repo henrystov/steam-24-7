@@ -1,14 +1,8 @@
-name: Steam Boost Manual
+name: Steam 24/7 Boost
 on:
+  schedule:
+    - cron: '0 * * * *'
   workflow_dispatch:
-    inputs:
-      steam_user:
-        description: 'Steam Username'
-        required: true
-      games:
-        description: 'AppIDs (comma separated)'
-        required: true
-        default: '440,570,730'
 
 jobs:
   run-booster:
@@ -22,21 +16,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Dependencies
-        run: npm install steam-user
+      - name: Install
+        # We run this in the workspace root to ensure boost.js is seen
+        run: |
+          cd ${{ github.workspace }}
+          npm install
 
-      - name: Wait for 2FA Code
-        id: get-2fa
-        uses: step-security/wait-for-secrets@v1
-        with:
-          secrets: |
-            STEAM_GUARD_CODE:
-              description: "Enter 5-digit code from Email/App"
-
-      - name: Run Script
+      - name: Start
         env:
-          STEAM_USER: ${{ github.event.inputs.steam_user }}
-          STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }} # Set this in GitHub Secrets
-          STEAM_GUARD_CODE: ${{ steps.get-2fa.outputs.STEAM_GUARD_CODE }}
-          GAMES: ${{ github.event.inputs.games }}
-        run: node boost.js
+          STEAM_USER: ${{ secrets.STEAM_USER }}
+          STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+        run: |
+          cd ${{ github.workspace }}
+          node boost.js
