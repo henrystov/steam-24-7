@@ -1,31 +1,36 @@
-name: Steam 24/7 Boost
+name: Steam 24/7 Web Boost
 on:
-  schedule:
-    - cron: '0 * * * *'
   workflow_dispatch:
+    inputs:
+      games:
+        description: 'AppIDs to boost (comma separated)'
+        default: '440,570,730'
 
 jobs:
-  run-booster:
+  boost:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install
-        # We run this in the workspace root to ensure boost.js is seen
-        run: |
-          cd ${{ github.workspace }}
-          npm install
+      - name: Wait for 2FA Code from Website
+        id: wait-for-2fa
+        uses: step-security/wait-for-secrets@v1
+        with:
+          secrets: |
+            STEAM_GUARD_CODE:
+              description: "Enter the 5-char code from your email"
 
-      - name: Start
+      - name: Run Booster
         env:
           STEAM_USER: ${{ secrets.STEAM_USER }}
           STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+          STEAM_GUARD_CODE: ${{ steps.wait-for-2fa.outputs.STEAM_GUARD_CODE }}
+          GAMES_LIST: ${{ github.event.inputs.games }}
         run: |
-          cd ${{ github.workspace }}
+          npm install
+          # Write the code to a file so boost.js can read it
+          echo "$STEAM_GUARD_CODE" > steam_guard_code.txt
           node boost.js
