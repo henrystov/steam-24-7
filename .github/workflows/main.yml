@@ -1,36 +1,42 @@
-name: Steam 24/7 Web Boost
+name: Steam Boost Manual
 on:
   workflow_dispatch:
     inputs:
+      steam_user:
+        description: 'Steam Username'
+        required: true
       games:
-        description: 'AppIDs to boost (comma separated)'
+        description: 'AppIDs (comma separated)'
+        required: true
         default: '440,570,730'
 
 jobs:
-  boost:
+  run-booster:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Wait for 2FA Code from Website
-        id: wait-for-2fa
+      - name: Install Dependencies
+        run: npm install steam-user
+
+      - name: Wait for 2FA Code
+        id: get-2fa
         uses: step-security/wait-for-secrets@v1
         with:
           secrets: |
             STEAM_GUARD_CODE:
-              description: "Enter the 5-char code from your email"
+              description: "Enter 5-digit code from Email/App"
 
-      - name: Run Booster
+      - name: Run Script
         env:
-          STEAM_USER: ${{ secrets.STEAM_USER }}
-          STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
-          STEAM_GUARD_CODE: ${{ steps.wait-for-2fa.outputs.STEAM_GUARD_CODE }}
-          GAMES_LIST: ${{ github.event.inputs.games }}
-        run: |
-          npm install
-          # Write the code to a file so boost.js can read it
-          echo "$STEAM_GUARD_CODE" > steam_guard_code.txt
-          node boost.js
+          STEAM_USER: ${{ github.event.inputs.steam_user }}
+          STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }} # Set this in GitHub Secrets
+          STEAM_GUARD_CODE: ${{ steps.get-2fa.outputs.STEAM_GUARD_CODE }}
+          GAMES: ${{ github.event.inputs.games }}
+        run: node boost.js
